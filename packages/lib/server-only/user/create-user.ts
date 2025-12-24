@@ -34,6 +34,7 @@ export const createUser = async ({ name, email, password, signature }: CreateUse
         email: email.toLowerCase(),
         password: hashedPassword, // Todo: (RR7) Drop password.
         signature,
+        emailVerified: new Date(), // Auto-confirm email
       },
     });
 

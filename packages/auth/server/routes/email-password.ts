@@ -6,7 +6,7 @@ import { DateTime } from 'luxon';
 import { z } from 'zod';
 
 import { EMAIL_VERIFICATION_STATE } from '@documenso/lib/constants/email';
-import { AppError } from '@documenso/lib/errors/app-error';
+import { AppError, AppErrorCode } from '@documenso/lib/errors/app-error';
 import { jobsClient } from '@documenso/lib/jobs/client';
 import { disableTwoFactorAuthentication } from '@documenso/lib/server-only/2fa/disable-2fa';
 import { enableTwoFactorAuthentication } from '@documenso/lib/server-only/2fa/enable-2fa';
@@ -150,16 +150,18 @@ export const emailPasswordRoute = new Hono<HonoAuthContext>()
 
     const { name, email, password, signature } = c.req.valid('json');
 
+    // Restrict signup to @predictablebenefits.com domain
+    const emailDomain = email.toLowerCase().split('@')[1];
+    if (emailDomain !== 'predictablebenefits.com') {
+      throw new AppError(AppErrorCode.INVALID_REQUEST, {
+        message: 'Signup is only allowed for @predictablebenefits.com email addresses',
+        userMessage: 'Signup is only allowed for @predictablebenefits.com email addresses',
+      });
+    }
+
     const user = await createUser({ name, email, password, signature }).catch((err) => {
       console.error(err);
       throw err;
-    });
-
-    await jobsClient.triggerJob({
-      name: 'send.signup.confirmation.email',
-      payload: {
-        email: user.email,
-      },
     });
 
     return c.text('OK', 201);

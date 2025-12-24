@@ -105,6 +105,15 @@ export const handleOAuthCallbackUrl = async (options: HandleOAuthCallbackUrlOpti
     return c.redirect(redirectPath, 302);
   }
 
+  // Restrict signup to @predictablebenefits.com domain
+  const emailDomain = email.toLowerCase().split('@')[1];
+  if (emailDomain !== 'predictablebenefits.com') {
+    throw new AppError(AppErrorCode.INVALID_REQUEST, {
+      message: 'Signup is only allowed for @predictablebenefits.com email addresses',
+      userMessage: 'Signup is only allowed for @predictablebenefits.com email addresses',
+    });
+  }
+
   // Handle new user.
   const createdUser = await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
