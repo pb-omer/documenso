@@ -73,13 +73,11 @@ export const ClaimAccount = ({ defaultName, defaultEmail }: ClaimAccountProps) =
     try {
       await authClient.emailPassword.signUp({ name, email, password });
 
-      await navigate(`/unverified-account`);
+      await navigate(`/`);
 
       toast({
         title: _(msg`Registration Successful`),
-        description: _(
-          msg`You have successfully registered. Please verify your account by clicking on the link you received in the email.`,
-        ),
+        description: _(msg`You have successfully registered and your account is ready to use.`),
         duration: 5000,
       });
 

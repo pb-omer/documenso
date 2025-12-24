@@ -105,27 +105,18 @@ export const emailPasswordRoute = new Hono<HonoAuthContext>()
       }
     }
 
+    // Auto-verify email if not already verified
     if (!user.emailVerified) {
-      const mostRecentToken = await getMostRecentEmailVerificationToken({
-        userId: user.id,
+      await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          emailVerified: new Date(),
+        },
       });
-
-      if (
-        !mostRecentToken ||
-        mostRecentToken.expires.valueOf() <= Date.now() ||
-        DateTime.fromJSDate(mostRecentToken.createdAt).diffNow('minutes').minutes > -5
-      ) {
-        await jobsClient.triggerJob({
-          name: 'send.signup.confirmation.email',
-          payload: {
-            email: user.email,
-          },
-        });
-      }
-
-      throw new AppError('UNVERIFIED_EMAIL', {
-        message: 'Unverified email',
-      });
+      // Update the user object for subsequent checks
+      user.emailVerified = new Date();
     }
 
     if (user.disabled) {

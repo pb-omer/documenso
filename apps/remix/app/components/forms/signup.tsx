@@ -112,13 +112,11 @@ export const SignUpForm = ({
         signature,
       });
 
-      await navigate(returnTo ? returnTo : '/unverified-account');
+      await navigate(returnTo ? returnTo : '/');
 
       toast({
         title: _(msg`Registration Successful`),
-        description: _(
-          msg`You have successfully registered. Please verify your account by clicking on the link you received in the email.`,
-        ),
+        description: _(msg`You have successfully registered and your account is ready to use.`),
         duration: 5000,
       });
 
